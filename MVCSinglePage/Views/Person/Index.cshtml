@@ -1,0 +1,141 @@
+@{
+    ViewData["Title"] = "مدیریت اشخاص (Single Page)";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Person Managment</h2>
+
+    <!-- نوار دکمه‌های عملیاتی (Add, Edit, Delete, Refresh) -->
+    <div class="mb-3 d-flex gap-2 align-items-center">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#personModal" id="btnOpenAddModal">
+         Add 
+        </button>
+        <button type="button" class="btn btn-primary" id="btnOpenEditModal" disabled>
+         Edit
+        </button>
+        <!-- دکمه حذف که مودال تأیید حذف را باز می‌کند -->
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" id="btnOpenDeleteModal" disabled>
+         Delete
+        </button>
+        <button type="button" class="btn btn-info text-white" data-bs-toggle="modal" data-bs-target="#detailsModal" id="btnOpenDetailsModal" disabled>
+         Detail
+        </button>
+        <span id="resultMessage" class="ms-3 text-muted"></span>
+    </div>
+
+    <!-- جدول داده‌ها (رندر سمت کلاینت با جاوااسکریپت) -->
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle" id="personsTable">
+            <thead class="table-dark">
+                <tr>
+                    <th style="width: 40px;">
+                        <input type="checkbox" class="form-check-input" id="selectAll" />
+                    </th>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Last name</th>
+                    <th>Age</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- ردیف‌ها به صورت داینامیک توسط فایل JS پُر می‌شوند -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ================= Delete Confirmation Modal ================= -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteConfirmModalLabel"> Confirm Delete</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="close">Close</button>
+            </div>
+            <div class="modal-body" id="deleteConfirmModalBody">
+                Are you sure you want to delete the selected records?
+            </div>
+            <div class="modal-footer">
+                <!-- فیلد مخفی برای نگهداری شناسه رکورد جهت ارسال به بک‌اند -->
+                <input type="hidden" id="inDeleteConfirmModalId" />
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="btnDeleteConfirm">Deletet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= مودال افزودن / ویرایش شخص ================= -->
+<div class="modal fade" id="personModal" tabindex="-1" aria-labelledby="personModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="personModalLabel">Person Form</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="">Close</button>
+            </div>
+            <div class="modal-body">
+                <form id="personForm" novalidate>
+                    <input type="hidden" id="personId" />
+                    <div class="mb-3">
+                        <label for="firstName" class="form-label">First name</label>
+                        <input type="text" class="form-control" id="firstName" required />
+                        <div id="firstNameValidationMessage" class="invalid-tooltip"></div>
+
+                    </div>
+                    <div class="mb-3">
+                        <label for="lastName" class="form-label">Last name</label>
+                        <input type="text" class="form-control" id="lastName" required />
+                        <div id="lastNameValidationMessage" class="invalid-tooltip"></div>
+
+                    </div>
+                    <div class="mb-3">
+                        <label for="age" class="form-label">Age</label>
+                        <input type="number" class="form-control" id="age" required />
+                        <div id="ageValidationMessage" class="invalid-tooltip"></div>
+
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btnSavePerson"> Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =================Details Modal ================= -->
+<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="detailsModalLabel">Person Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="fw-bold">Id:</label>
+                    <span id="detailId" class="text-secondary"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">First name:</label>
+                    <span id="detailFirstName" class="text-secondary"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Last name:</label>
+                    <span id="detailLastName" class="text-secondary"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Age:</label>
+                    <span id="detailAge" class="text-secondary"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/Person.js"></script>
