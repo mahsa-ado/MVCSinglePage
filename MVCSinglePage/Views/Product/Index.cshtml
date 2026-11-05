@@ -1,47 +1,106 @@
-@model IEnumerable<MVCSinglePage.Models.DomainModels.ProductAggregates.Product>
+<link rel="stylesheet" href="/css/style.css" />
 
-@{
-    ViewData["Title"] = "Index";
-}
+<div class="person-page">
+    <main class="person-card">
+        <header class="person-header">
+            <div>
+                <span class="eyebrow">PRODUCT DIRECTORY</span>
+                <h1>Product Management</h1>
+            </div>
+            <div class="people-count">
+                <span id="totalCount">0</span>
+                <small>Products</small>
+            </div>
+        </header>
 
-<h1>Index</h1>
+        <section class="person-section">
+            <div class="section-heading">
+                <div>
+                    <h2>Product Details</h2>
+                    <p id="formModeText">Add a new product or select a row to edit.</p>
+                </div>
+            </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UnitPrice)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DescriptionRecord)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(model => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.UnitPrice)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.DescriptionRecord)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+            <!-- Data Entry Form -->
+            <form id="productForm">
+                <input type="hidden" id="productId" />
+
+                <div class="form-grid">
+                    <div>
+                        <label for="title" class="form-label">Title</label>
+                        <input id="title" name="title" class="form-control"
+                               type="text" placeholder="Enter product title" autocomplete="off" required />
+                    </div>
+
+                    <div>
+                        <label for="unitPrice" class="form-label">Unit Price</label>
+                        <input id="unitPrice" name="unitPrice" class="form-control"
+                               type="number" step="0.01" min="0" placeholder="Enter unit price" required />
+                    </div>
+
+                    <div>
+                        <label for="descriptionRecord" class="form-label">Description</label>
+                        <input id="descriptionRecord" name="descriptionRecord" class="form-control"
+                               type="text" placeholder="Enter description" autocomplete="off" />
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button id="btnAdd" type="button" class="btn btn-primary">Add new</button>
+                    <button id="btnSave" type="submit" class="btn btn-success">Save product</button>
+                    <button id="btnCancelEdit" type="button" class="btn btn-light" hidden>Cancel</button>
+                    <span id="resultMessage" role="status"></span>
+                </div>
+            </form>
+        </section>
+
+        <!-- Detail Panel -->
+        <section id="detailPanel" class="detail-panel" hidden>
+            <div>
+                <span class="eyebrow">SELECTED PRODUCT</span>
+                <h2 id="detailTitle"></h2>
+            </div>
+            <div class="detail-values">
+                <span>Unit Price: <strong id="detailUnitPrice"></strong></span>
+                <span>Description: <strong id="detailDescription"></strong></span>
+                <span>ID: <strong id="detailId"></strong></span>
+            </div>
+        </section>
+
+        <!-- Show List -->
+        <section class="person-section list-section">
+            <div class="section-heading list-heading">
+                <div>
+                    <h2>Products List</h2>
+                    <p>Select one product using the checkbox to edit, view, or delete.</p>
+                </div>
+                <!-- Action Buttons -->
+                <div class="list-actions">
+                    <button id="btnEdit" type="button" class="btn btn-outline-primary" disabled>Edit</button>
+                    <button id="btnDetail" type="button" class="btn btn-outline-secondary" disabled>Detail</button>
+                    <button id="btnDelete" type="button" class="btn btn-outline-danger" disabled>Delete</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table people-table">
+                    <thead>
+                        <tr>
+                            <th scope="col" aria-label="Select product"></th>
+                            <th>TITLE</th>
+                            <th>UNIT PRICE</th>
+                            <th>DESCRIPTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody">
+                        <tr>
+                            <td colspan="4" class="empty-state">Loading products…</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="/js/Product.js"></script>

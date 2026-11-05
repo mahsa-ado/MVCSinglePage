@@ -22,7 +22,10 @@ public class ProductController : Controller
 
         if (result == null)
         {
-            return NotFound();
+            return BadRequest(new
+            {
+                message = "The submitted information could not be processed."
+            });
         }
 
         return View(result);
@@ -47,17 +50,18 @@ public class ProductController : Controller
 
     #region [- Post() -]
     [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(PutProductDto updateProductDto)
+    
+    public async Task<IActionResult> Edit([FromBody]PutProductDto updateProductDto)
     {
         if (ModelState.IsValid)
         {
             await _productApplicationService.Put(updateProductDto);
-            return RedirectToAction(nameof(Index));
+            return Json(new {success=true,message= "Operation successful" });
         }
         else
         {
-            return View(updateProductDto);
+            return Json(new { success = true, message = "Operation successful" });
+
         }
     }
     #endregion
@@ -137,4 +141,12 @@ public class ProductController : Controller
     }
     #endregion
 
+    #region [- GetAll() -]
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var result = await _productApplicationService.GetAllProducts();
+        return Json(result);
+    } 
+    #endregion
 }

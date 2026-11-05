@@ -20,7 +20,7 @@ public class PersonController : Controller
     #endregion
 
     #region [- Detail() -]
-
+    [HttpGet]
     public async Task<IActionResult> Detail(GetPersonByIdDto getPersonDtoById)
     {
         if (getPersonDtoById == null)
@@ -58,16 +58,16 @@ public class PersonController : Controller
     #region [- Post() -]
     [HttpPost]
     //[ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(PutPersonDto putPersonDto)
+    public async Task<IActionResult> Edit([FromBody] PutPersonDto putPersonDto)
     {
         if (ModelState.IsValid)
         {
             await _personApplicationService.Put(putPersonDto);
-            return Json(new { success = false, message = "Validation successful" });
+            return Json(new { success = true, message = "Operation successful" });
         }
         else
         {
-            return Json(new { success = false, message = "Validation failed" });
+            return Json(new { success = false, message = "Operation failed" });
         }
     }
     #endregion
@@ -143,6 +143,25 @@ public class PersonController : Controller
             return Json(new { success = false, message = "Validation failed" });
         }
 
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetPersonDetails([FromQuery] GetPersonByIdDto getPersonByIdDto)
+    {
+        var result = await _personApplicationService.GetPersonDetail(getPersonByIdDto);
+        return result == null ? NotFound() : Json(result);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DeletePerson([FromBody] DeletePersonDto deletePersonDto)
+    {
+        if (deletePersonDto == null || deletePersonDto.Id == Guid.Empty)
+        {
+            return BadRequest(new { success = false, message = "Invalid person id" });
+        }
+
+        await _personApplicationService.Delete(deletePersonDto);
+        return Json(new { success = true, message = "Operation successful" });
     }
     #endregion
 

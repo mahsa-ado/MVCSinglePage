@@ -1,250 +1,287 @@
-﻿const API_URL = '/Person';
+﻿
+const personForm = document.getElementById('personForm');
+// inputs
 
-//form  
-const form =document.getElementById("personForm");
-//allow buttons
-const btnSavePerson = document.getElementById("btnSavePerson");
-const btnDeleteConfirm = document.getElementById("btnDeleteConfirm");
-//button  modal
-const btnClose = document.getElementsByClassName("btn-close btn-close-white");
-const btnCancel = document.getElementsByClassName("btn btn-secondary");
-//check box
-const chkSelectAll = document.getElementById("selectAll");
-//input
-const inDeleteConfirmModalId = document.getElementById("inDeleteConfirmModalId");
-const personId = document.getElementById("personId");
-const firstName = document.getElementById("firstName");
-const lastName = document.getElementById("lastName");
-const age = document.getElementById("age");
-//btn Open modals
-const openDetailsModal = document.getElementById("btnOpenDetailsModal");
-const openAddModal = document.getElementById("btnOpenAddModal");
-const openDeleteModal = document.getElementById("btnOpenDeleteModal");
-const openEditModal = document.getElementById("btnOpenEditModal");
-//ValidationMessages
-const firstNameValidationMessage = document.getElementById("firstNameValidationMessage");
-const lastNameValidationMessage = document.getElementById("lastNameValidationMessage");
-const ageValidationMessage = document.getElementById("ageValidationMessage");
+const personIdInput = document.getElementById('personId');
+const firstNameInput = document.getElementById('firstName');
+const lastNameInput = document.getElementById('lastName');
+const ageInput = document.getElementById('age');
 //others
-const resultMessage = document.getElementById("resultMessage");
+const peopleTableBody = document.getElementById('peopleTableBody');
+const totalCount = document.getElementById('totalCount');
+const resultMessage = document.getElementById('resultMessage');
+const formModeText = document.getElementById('formModeText');
+//detail
+const detailPanel = document.getElementById('detailPanel');
+const detailName = document.getElementById('detailName');
+const detailAge = document.getElementById('detailAge');
+const detailId = document.getElementById('detailId');
+//buttons
+const btnAdd = document.getElementById('btnAdd');
+const btnSave = document.getElementById('btnSave');
+const btnEdit = document.getElementById('btnEdit');
+const btnDetail = document.getElementById('btnDetail');
+const btnDelete = document.getElementById('btnDelete');
+const btnCancelEdit = document.getElementById('btnCancelEdit');
 
-//======Event listener======
-btnSavePerson.addEventListener("click",Add);
-openEditModal.addEventListener("click",Edit)
-form.addEventListener("submit", Add);
+let people = [];
+let selectedPersonId = null;
+let isEditing = false;
 
-//=====functions============
-//خالی کردن فرم 
-function RefreshForm(){
-    firstName.classList.remove("is-invalid", "is-valid");
-    lastName.classList.remove("is-invalid", "is-valid");
-    age.classList.remove("is-invalid", "is-valid");
+// Event
+personForm.addEventListener('submit', savePerson);
+peopleTableBody.addEventListener('change', selectFromCheckbox);
+btnAdd.addEventListener('click', resetForm);
+btnCancelEdit.addEventListener('click', resetForm);
+btnEdit.addEventListener('click', editPerson);
+btnDetail.addEventListener('click', showDetails);
+btnDelete.addEventListener('click', deletePerson);
 
-    firstName.value = "";
-    lastName.value = "";
-    age.value = "";
+// بارگذاری فهرست افراد هنگام باز شدن صفحه
+loadPeople();
 
-    firstNameValidationMessage.innerText = "";
-    lastNameValidationMessage.innerText = "";
-    ageValidationMessage.innerText = "";
-
-
-}
-//اعتبارسنجی اطلاعات در فرم 
-function ValidateFormData() {
-    var isValidData = true;
-    if (firstName.value == "") {
-        firstNameValidationMessage.innerText = "firstname is required";
-        firstNameValidationMessage.classList.add("is-invalid");
-        isValidData = false;
-    }
-    else {
-        firstNameValidationMessage.classList.add("is-valid");
-    }
-
-    if (lastName.value == "") {
-        lastNameValidationMessage.innerText = "lastname is required";
-        lastNameValidationMessage.classList.add("is-invalid");
-        isValidData = false;
-    }
-    else {
-        lastNameValidationMessage.classList.add("is-valid");
-    }
-
-    if (age.value == ""||age.value<=0) {
-        ageValidationMessage.innerText = "age  is required";
-        ageValidationMessage.classList.add("is-invalid");
-        isValidData = false;
-    }
-    else {
-        ageValidationMessage.classList.add("is-valid");
-    }
-    return isValidData;
-}
-//نمایش دیتا در جدول
-window.addEventListener("DOMContentLoaded", LoadData);
-async function LoadData() {
-    console.log("page is loading...");
-    RefreshForm();
-    chkSelectAll.checked = false;
-    DeselectAll();
+// گرفتن فهرست افراد از سرور
+async function loadPeople() {
     try {
-        const response = await fetch("/Person/GetAll");
-        if (!response.ok) {
-            throw new Error("Network response was not ok");
-        }
-        const dto = await response.json();
-        console.log({ dto });
-        console.table(dto);
-        const html = dto.map((item) =>
-            `<tr id="${item.id}">
-            <td><input type="checkbox"></td>
-            <td id="${item.id}"></td>
-            <td><input id="selectRow" class="form-check-input" type="checkbox" name="${item.id}" onClick="SelectRow(this);"/></td>
-            <td id="fntd" class="fn" >${item.firstName}</td>
-            <td id="lntd" class="ln" >${item.lastName}</td>
-            <td id="agtd" class="age" >${item.age}</td>
+        const response = await fetch('/Person/GetAll');
+        people = await response.json();
+        showPeople();
+        enableButtons();
+    } catch (error) {
+        showMessage('Operation failed');
+    }
+}
+
+// نمایش افراد در جدول
+
+function showPeople() {
+    totalCount.textContent = people.length;
+    peopleTableBody.innerHTML = '';
+
+    if (people.length === 0) {
+        peopleTableBody.innerHTML = `
+            <tr>
+                <td colspan="4">No Person has been added yet</td>
+            </tr>
+        `;
+        return;
+    }
+
+    people.forEach(person => {
+        const row = document.createElement('tr');
+
+        // if (person.id === selectedPersonId) {
+        //     row.classList.add('selected-row');
+        // }
+
+        row.innerHTML = `
             <td>
-            <input class="btn btn-outline-primary btn-sm" type="button" value="Details" data-bs-toggle="modal" data-bs-target="#detailsModal">
-            <input class="btn btn-outline-danger btn-sm" type="button" value="Delete" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">  
+                <input type="checkbox"
+                       class="person-select"
+                       ${person.id === selectedPersonId ? 'checked' : ''}>
             </td>
-            </tr>`
-        ).join("");
-        document.querySelector("#personsTable tbody").innerHTML = html;
+            <td>${person.firstName}</td>
+            <td>${person.lastName}</td>
+            <td>${person.age}</td>
+        `;
 
-    }
-    catch (error) {
-        console.error("Error loading data:", error);
-    }
+        // ذخیره شناسه داخل خود تگ HTML
+        row.setAttribute('person-id', person.id);
+
+        peopleTableBody.appendChild(row);
+    });
 }
-async function Add(e) {
-    e.preventDefault();
-    if (!ValidateFormData()) return;
 
-    const dto = {
-        id: "",
-        firstName: firstName.value.trim(),
-        lastName: lastName.value.trim(),
-        age: age.value.trim(),
-    };
-    try {
-        const response = await fetch("/Person/Create", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "*/*",
-            },
-            body: JSON.stringify(dto),
-        });
-        if (response.ok) {
-            TriggerResultMessage("Operation successful");
-            await LoadData();
-            const modalElement = document.getElementById("personModal");
-            const modalInstance = bootstrap.Modal.getInstance(modalElement);
-            if (modalInstance) {
-                modalInstance.hide();
-            }
-        
+
+// انتخاب یک نفر با چک‌باکس
+
+
+
+function selectFromCheckbox(event) {
+
+    const checkbox = event.target;
+
+    // بررسی اینکه عنصر کلیک‌شده چک‌باکس باشد
+    if (checkbox.className !== 'person-select') {
+        return;
+    }
+
+    // پیدا کردن ردیف مربوط به چک‌باکس
+    const row = checkbox.closest('tr');
+
+    // بررسی وضعیت چک‌باکس
+    if (checkbox.checked === true) {
+
+        selectedPersonId = row.getAttribute('person-id');
+
+    } else {
+
+        selectedPersonId = null;
+
+    }
+
+    // به روزرسانی جدول و دکمه ها
+    showPeople();
+    enableButtons();
+}
+
+
+// فعال یا غیرفعال کردن دکمه‌ها
+function enableButtons() {
+
+        if (selectedPersonId === null) {
+
+            btnEdit.disabled = true;
+            btnDetail.disabled = true;
+            btnDelete.disabled = true;
+
         } else {
-            TriggerResultMessage("Operation Failed");
+
+            btnEdit.disabled = false;
+            btnDetail.disabled = false;
+            btnDelete.disabled = false;
 
         }
-    }
-    catch (error){
-        console.error("error adding:", error);
-        TriggerResultMessage("Operation Failed");
 
-    }
-}
-
-//ویرایش دیتا
-async function Edit() {
     
-    const dto = {
-        id: personId.value,
-        firstName: firstName.value.trim(),
-        lastName: lastName.value.trim(),
-        age: age.value.trim(),
-        };
-    try {
-        const response = await fetch("/Person/Edit", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "*/*",
-            },
-            body: JSON.stringify(dto),
-        });
-        if (response.ok) {
-            TriggerResultMessage("Operation successful");
-            await LoadData();
-        } else {
-            TriggerResultMessage("Operation failed");
+
+}
+
+// پر کردن فرم با اطلاعات فرد انتخاب‌شده
+
+function editPerson() {
+
+    // پیدا کردن شخص انتخاب شده
+    let person = null;
+
+    for (let i = 0; i < people.length; i++) {
+
+        if (people[i].id == selectedPersonId) {
+            person = people[i];
+            break;
         }
-    }
-
-    catch (error) {
-        console.error("Error updating person:", error);
-        TriggerResultMessage("Operation failed");
 
     }
-}
-
-//نمایش دیتا
-// async function Details() {
-//     LoadData()
-// }
-
-
-//انتخاب یک  سطر
-selectedRowsList = [];
-allRowsCount=0;
-async function SelectRow(checkbox) {
-    if (checkbox.checked) {
-        selectedRowsList.push(checkbox.name)
-    } else {
-        selectedRowsList = selectedRowsList.filter(id => id !== checkbox.name);
+    if (person == null) {
+        return;
     }
-    chkSelectAll.checked = (selectedRowsList.length === allRowsCount && allRowsCount > 0);
-    if (selectedRowsList.length === 1) {
-        openEditModal.disabled = false;
-        RefreshForm();
-        const row = document.getElementById(selectedRowsList[0]);
-        personId.value = checkbox.value;
-        firstName.value = document.querySelector(".fn").innerText.trim();
-        lastName.value = document.querySelector(".ln").innerText.trim();
-        age.value = document.querySelector(".age").innerText.trim();
-    } else {
-        openEditModal.disabled = true;
-        RefreshForm();
-    }
+
+    isEditing = true;
+
+    // قرار دادن اطلاعات شخص داخل فرم
+    personIdInput.value = person.id;
+    firstNameInput.value = person.firstName;
+    lastNameInput.value = person.lastName;
+    ageInput.value = person.age;
+    formModeText.textContent = 'Edit';
+    btnSave.textContent = 'Save Changes';
+
+    // نمایش دکمه لغو ویرایش
+    btnCancelEdit.hidden = false;
 }
 
 
- // مدیریت فعال/غیرفعال کردن دکمه‌ها بر اساس انتخاب‌ها
-function ToggleActionButtons() {
-    if (selectedRowsList.length >= 1) {
-        openDeleteModal.disabled = false;
+// افزودن فرد جدید یا ویرایش فرد انتخاب‌شده
+
+async function savePerson(event) {
+    event.preventDefault();
+
+    if (!personForm.reportValidity()) return;
+
+    let url = '';
+
+    if (isEditing) {
+        url = '/Person/Edit';
     } else {
-        openDeleteModal.disabled = true;
+        url = '/Person/Create';
     }
-    if (selectedRowsList.length === 1) {
-        openEditModal.disabled = false;
-    } else {
-        openEditModal.disabled = true;
+
+    const person = {
+        id: personIdInput.value,
+        firstName: firstNameInput.value,
+        lastName: lastNameInput.value,
+        age: Number(ageInput.value)
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(person)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            showMessage('Operation failed');
+            return;
+        }
+
+        resetForm();
+        selectedPersonId = null;
+
+        await loadPeople();
+
+        showMessage('Saved successfully');
+
+    } catch (error) {
+        showMessage('It was not saved successfully');
     }
 }
 
-// مدیریت انتخاب/عدم انتخاب همه چک‌باکس‌ها
-function SelectAll() {
 
+// نمایش جزئیات
+async function showDetails() {
+    try {
+        const response = await fetch('/Person/GetPersonDetails?id= '+selectedPersonId);
+        const person = await response.json();
+        detailName.textContent = person.firstName + ' ' + person.lastName;
+        detailAge.textContent = person.age;
+        detailId.textContent = person.id;
+        detailPanel.hidden = false;
+    } catch (error) {
+        showMessage('دریافت جزئیات انجام نشد.');
+    }
 }
 
-//پیام نتیجه
-function TriggerResultMessage(message) {
-    resultMessage.innerText = message;
-    resultMessage.style.opacity = "1";
-    setTimeout(() => {
-        resultMessage.style.opacity = "0";
-    }, 2000);
+// حذف
+async function deletePerson() {
+    if (!confirm("Are you sure you want to delete this person ?")) return;
+
+    try {
+        const response = await fetch('/Person/DeletePerson', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: selectedPersonId })
+        });
+
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            showMessage('Operation failed');
+            return;
+        }
+
+        resetForm();
+        selectedPersonId = null;
+        await loadPeople();
+        showMessage('Person deleted successfully');
+    } catch (error) {
+        showMessage('Operation failed');
+    }
+}
+
+// خالی کردن فرم
+function resetForm() {
+    personForm.reset();
+    personIdInput.value = '';
+    isEditing = false;
+    formModeText.textContent = 'Add a new person or select a row to edit.';
+    btnSave.textContent = 'Save person';
+    btnCancelEdit.hidden = true;
+    detailPanel.hidden = true;
+}
+
+// نمایش پیام کوتاه
+function showMessage(message) {
+    resultMessage.textContent = message;
 }
