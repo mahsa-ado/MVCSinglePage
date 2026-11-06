@@ -44,6 +44,7 @@ loadPeople();
 async function loadPeople() {
     try {
         const response = await fetch('/Person/GetAll');
+        if (!response.ok) throw new Error('Could not load people');
         people = await response.json();
         showPeople();
         enableButtons();
@@ -74,19 +75,20 @@ function showPeople() {
         //     row.classList.add('selected-row');
         // }
 
-        row.innerHTML = `
-            <td>
-                <input type="checkbox"
-                       class="person-select"
-                       ${person.id === selectedPersonId ? 'checked' : ''}>
-            </td>
-            <td>${person.firstName}</td>
-            <td>${person.lastName}</td>
-            <td>${person.age}</td>
-        `;
+        const checkboxCell = document.createElement('td');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'person-select';
+        checkbox.checked = person.id === selectedPersonId;
+        checkboxCell.appendChild(checkbox);
+        row.appendChild(checkboxCell);
 
-        // ذخیره شناسه داخل خود تگ HTML
-        row.setAttribute('person-id', person.id);
+        [person.firstName, person.lastName, person.age].forEach(value => {
+            const cell = document.createElement('td');
+            cell.textContent = value ?? '';
+            row.appendChild(cell);
+        });
+        row.dataset.personId = person.id;
 
         peopleTableBody.appendChild(row);
     });
@@ -108,11 +110,12 @@ function selectFromCheckbox(event) {
 
     // پیدا کردن ردیف مربوط به چک‌باکس
     const row = checkbox.closest('tr');
+    if (!row) return;
 
     // بررسی وضعیت چک‌باکس
-    if (checkbox.checked === true) {
+    if (checkbox.checked ) {
 
-        selectedPersonId = row.getAttribute('person-id');
+        selectedPersonId = row.dataset.personId;
 
     } else {
 
@@ -148,7 +151,6 @@ function enableButtons() {
 }
 
 // پر کردن فرم با اطلاعات فرد انتخاب‌شده
-
 function editPerson() {
 
     // پیدا کردن شخص انتخاب شده
@@ -197,7 +199,8 @@ async function savePerson(event) {
     }
 
     const person = {
-        id: personIdInput.value,
+        // Guid properties must receive a valid GUID string, including on create.
+        id: personIdInput.value || '00000000-0000-0000-0000-000000000000',
         firstName: firstNameInput.value,
         lastName: lastNameInput.value,
         age: Number(ageInput.value)
@@ -213,7 +216,7 @@ async function savePerson(event) {
         const result = await response.json();
 
         if (!response.ok || !result.success) {
-            showMessage('Operation failed');
+            showMessage(result.message || 'Operation failed');
             return;
         }
 
@@ -233,7 +236,9 @@ async function savePerson(event) {
 // نمایش جزئیات
 async function showDetails() {
     try {
-        const response = await fetch('/Person/GetPersonDetails?id= '+selectedPersonId);
+        if (!selectedPersonId) return;
+        const response = await fetch(`/Person/GetPersonDetails?id=${encodeURIComponent(selectedPersonId)}`);
+        if (!response.ok) throw new Error('Could not load person details');
         const person = await response.json();
         detailName.textContent = person.firstName + ' ' + person.lastName;
         detailAge.textContent = person.age;
@@ -246,18 +251,19 @@ async function showDetails() {
 
 // حذف
 async function deletePerson() {
-    if (!confirm("Are you sure you want to delete this person ?")) return;
+    if (!selectedPersonId || !confirm("Are you sure you want to delete this person?")) return;
 
     try {
-        const response = await fetch('/Person/DeletePerson', {
+        const response = await fetch('/Person/Delete', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: selectedPersonId })
         });
 
-        const result = await response.json();
+        const responseBody = await response.text();
+        const result = responseBody ? JSON.parse(responseBody) : {};
         if (!response.ok || !result.success) {
-            showMessage('Operation failed');
+            showMessage(result.message || 'Operation failed');
             return;
         }
 
@@ -266,7 +272,7 @@ async function deletePerson() {
         await loadPeople();
         showMessage('Person deleted successfully');
     } catch (error) {
-        showMessage('Operation failed');
+        showMessage(error.message || 'Person could not be deleted.');
     }
 }
 

@@ -61,14 +61,13 @@ namespace MVCSinglePage.ApplicationServices.Services
         #region [- Delete() -]
         public async Task Delete(DeletePersonDto deletePersonDto)
         {
-
-            var deletePerson = new Person
+            var deletePerson = await _personRepository.SelectPersonById(
+                new GetPersonByIdDto { Id = deletePersonDto.Id });
+            if (deletePerson == null)
             {
-                Id = deletePersonDto.Id,
-                FirstName = deletePersonDto.FirstName,
-                LastName = deletePersonDto.LastName,
-                Age = deletePersonDto.Age
-            };
+                return;
+            }
+
             await _personRepository.Delete(deletePerson);
 
         }

@@ -67,13 +67,13 @@ namespace MVCSinglePage.ApplicationServices.Services
             {
                 return;
             }
-            var deleteProducts = new Product()
+            var deleteProducts = await _productRepository.SelectProductById(
+                new GetProductByIdDto { Id = deleteProductDto.Id });
+            if (deleteProducts == null)
             {
-                Id = deleteProductDto.Id,
-                Title = deleteProductDto.Title,
-                UnitPrice = deleteProductDto.UnitPrice,
-                DescriptionRecord = deleteProductDto.DescriptionRecord,
-            };
+                return;
+            }
+
             await _productRepository.Delete(deleteProducts);
         }
         #endregion

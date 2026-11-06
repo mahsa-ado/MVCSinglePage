@@ -22,35 +22,17 @@ public class ProductController : Controller
 
         if (result == null)
         {
-            return BadRequest(new
-            {
-                message = "The submitted information could not be processed."
-            });
+            return BadRequest(new{message = "The information could not be processed."});
         }
 
-        return View(result);
+        return Json(result);
     }
     #endregion
 
     #region [- Edit() -]
 
-    #region [- Get() -]
-    [HttpGet]
-    public async Task<IActionResult> Edit(GetProductByIdDto getProductDtoById)
-    {
-        var product = await _productApplicationService.GetProductById(getProductDtoById);
-        if (product == null)
-        {
-            return NotFound();
-        }
-
-        return View(product);
-    }
-    #endregion
-
     #region [- Post() -]
     [HttpPost]
-    
     public async Task<IActionResult> Edit([FromBody]PutProductDto updateProductDto)
     {
         if (ModelState.IsValid)
@@ -60,7 +42,7 @@ public class ProductController : Controller
         }
         else
         {
-            return Json(new { success = true, message = "Operation successful" });
+            return Json(new { success = false, message = "Operation failed" });
 
         }
     }
@@ -70,35 +52,31 @@ public class ProductController : Controller
 
     #region [- Delete() -]
 
-    #region [- Get() -]
-    [HttpGet]
-    public async Task<IActionResult> Delete(GetProductByIdDto getProductDtoById)
-    {
-        var product = await _productApplicationService.GetProductDelete(getProductDtoById);
-        if (product == null)
-        {
-            return NotFound();
-        }
-
-        return View(product);
-
-    }
-    #endregion
-
     #region [- Post() -]
     [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Delete(DeleteProductDto deleteProductDto)
+    public async Task<IActionResult> Delete([FromBody]DeleteProductDto deleteProductDto)
     {
+        if (deleteProductDto == null || deleteProductDto.Id == Guid.Empty)
+        {
+            return BadRequest(new { success = false, message = "Invalid product id" });
+        }
+
         if (ModelState.IsValid)
         {
-            await _productApplicationService.Delete(deleteProductDto);
+            var product = await _productApplicationService.GetProductDelete(
+                new GetProductByIdDto { Id = deleteProductDto.Id });
+            if (product == null)
+            {
+                return NotFound(new { success = false, message = "Product was not found" });
+            }
 
-            return RedirectToAction(nameof(Index));
+            await _productApplicationService.Delete(product);
+
+            return Json(new { success = true, message = "Product deleted successfully" });
         }
         else
         {
-            return View(deleteProductDto);
+            return BadRequest(new { success = false, message = "Validation failed" });
         }
     }
     #endregion
@@ -107,27 +85,18 @@ public class ProductController : Controller
 
     #region [- Create() -]
 
-    #region [- Get() -]
-    [HttpGet]
-    public IActionResult Create()
-    {
-        return View();
-    }
-    #endregion
-
     #region [- Post() -]
     [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(PostProductDto postProductDto)
+    public async Task<IActionResult> Create([FromBody]PostProductDto postProductDto)
     {
         if (ModelState.IsValid)
         {
             await _productApplicationService.Post(postProductDto);
-            return RedirectToAction(nameof(Index));
+            return Json(new { success = true, message = "Validation successful" });
         }
         else
         {
-            return View(postProductDto);
+            return Json(new { success = false, message = "Validation failed" });
         }
     }
     #endregion
@@ -137,7 +106,8 @@ public class ProductController : Controller
     public async Task<IActionResult> Index()
     {
         var result = await _productApplicationService.GetAllProducts();
-        return View(result);
+        return View();
+            
     }
     #endregion
 

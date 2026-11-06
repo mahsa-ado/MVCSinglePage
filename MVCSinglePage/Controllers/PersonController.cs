@@ -19,42 +19,24 @@ public class PersonController : Controller
     }
     #endregion
 
-    #region [- Detail() -]
+    #region [- GetPersonDetails() -]
     [HttpGet]
-    public async Task<IActionResult> Detail(GetPersonByIdDto getPersonDtoById)
+    public async Task<IActionResult> GetPersonDetails([FromQuery] GetPersonByIdDto getPersonByIdDto)
     {
-        if (getPersonDtoById == null)
-        {
-            return NotFound();
-        }
-        var result = await _personApplicationService.GetPersonDetail(getPersonDtoById);
+        var result = await _personApplicationService.GetPersonDetail(getPersonByIdDto);
         if (result == null)
         {
-            return NotFound();
+            return BadRequest(new{ message = "The submitted information could not be processed."});
         }
-
-        return View(result);
+        else
+        {
+            return Json(result);
+        }
     }
     #endregion
 
     #region [- Edit() -]
-    #region [- Get() -]
-    [HttpGet]
-    public async Task<IActionResult> Edit(GetPersonByIdDto getPersonDtoById)
-    {
-        if (getPersonDtoById == null)
-        {
-            return NotFound();
-        }
-        var result = await _personApplicationService.GetPersonById(getPersonDtoById);
-        if (result == null)
-        {
-            return NotFound();
-        }
 
-        return View(result);
-    }
-    #endregion
     #region [- Post() -]
     [HttpPost]
     //[ValidateAntiForgeryToken]
@@ -74,38 +56,30 @@ public class PersonController : Controller
     #endregion
 
     #region [- Delete() -]
-    #region [- Get() -]
-    public async Task<IActionResult> Delete(GetPersonByIdDto getPersonDtoById)
-    {
-        if (getPersonDtoById == null)
-        {
-            return NotFound();
-        }
-
-        var person = await _personApplicationService.GetPersonDelete(getPersonDtoById);
-
-        if (person == null)
-        {
-            return NotFound();
-        }
-        return View(person);
-    }
-
-    #endregion
     #region [- Post() -]
     [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Delete(DeletePersonDto deletePersonDto)
+    public async Task<IActionResult> Delete([FromBody]DeletePersonDto deletePersonDto)
     {
+        if (deletePersonDto == null || deletePersonDto.Id == Guid.Empty)
+        {
+            return BadRequest(new { success = false, message = "Invalid person id" });
+        }
         if (ModelState.IsValid)
         {
-            await _personApplicationService.Delete(deletePersonDto);
-            return RedirectToAction(nameof(Index));
+            var person = await _personApplicationService.GetPersonDelete(
+                new GetPersonByIdDto { Id = deletePersonDto.Id });
+            if (person == null)
+            {
+                return NotFound(new { success = false, message = "Person was not found" });
+            }
+
+            await _personApplicationService.Delete(person);
+            return Json(new { success = true, message = "Person deleted successfully" });
 
         }
         else
         {
-            return View(deletePersonDto);
+            return BadRequest(new { success = false, message = "Validation failed" });
         }
     }
     #endregion
@@ -120,14 +94,6 @@ public class PersonController : Controller
     #endregion
 
     #region [- create() -]
-
-    #region [- Get() -]
-    [HttpGet]
-    public IActionResult Create()
-    {
-        return View();
-    }
-    #endregion
     #region [- Post() -]
     [HttpPost]
     public async Task<IActionResult> create([FromBody] PostPersonDto postPersonDto)
@@ -145,24 +111,8 @@ public class PersonController : Controller
 
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetPersonDetails([FromQuery] GetPersonByIdDto getPersonByIdDto)
-    {
-        var result = await _personApplicationService.GetPersonDetail(getPersonByIdDto);
-        return result == null ? NotFound() : Json(result);
-    }
 
-    [HttpPost]
-    public async Task<IActionResult> DeletePerson([FromBody] DeletePersonDto deletePersonDto)
-    {
-        if (deletePersonDto == null || deletePersonDto.Id == Guid.Empty)
-        {
-            return BadRequest(new { success = false, message = "Invalid person id" });
-        }
 
-        await _personApplicationService.Delete(deletePersonDto);
-        return Json(new { success = true, message = "Operation successful" });
-    }
     #endregion
 
     #endregion
