@@ -245,7 +245,7 @@ async function showDetails() {
         detailId.textContent = person.id;
         detailPanel.hidden = false;
     } catch (error) {
-        showMessage('دریافت جزئیات انجام نشد.');
+        showMessage('Operation failed');
     }
 }
 

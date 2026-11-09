@@ -157,7 +157,7 @@ async function saveProduct(event) {
 async function showDetails() {
     if (!selectedProductId) return;
     try {
-        const response = await fetch(`/Product/Detail?id=${encodeURIComponent(selectedProductId)}`);
+        const response = await fetch(`/Product/GetProductDetails?id=${encodeURIComponent(selectedProductId)}`);
         if (!response.ok) throw new Error('Could not load product details');
         const product = await response.json();
         detailTitle.textContent = product.title ?? '';

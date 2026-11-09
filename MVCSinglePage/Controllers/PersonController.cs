@@ -66,14 +66,8 @@ public class PersonController : Controller
         }
         if (ModelState.IsValid)
         {
-            var person = await _personApplicationService.GetPersonDelete(
-                new GetPersonByIdDto { Id = deletePersonDto.Id });
-            if (person == null)
-            {
-                return NotFound(new { success = false, message = "Person was not found" });
-            }
 
-            await _personApplicationService.Delete(person);
+            await _personApplicationService.Delete(deletePersonDto);
             return Json(new { success = true, message = "Person deleted successfully" });
 
         }

@@ -1,8 +1,10 @@
-using MVCSinglePage.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MVCSinglePage.ApplicationServices.Dtos.PersonDtos;
 using MVCSinglePage.ApplicationServices.Dtos.ProductDtos;
+using MVCSinglePage.ApplicationServices.Services;
 using MVCSinglePage.ApplicationServices.Services.Contracts;
+using MVCSinglePage.Models;
 
 public class ProductController : Controller
 {
@@ -14,18 +16,19 @@ public class ProductController : Controller
     }
     #endregion
 
-    #region [- Detail() -]
+    #region [- GetProductDetails() -]
     [HttpGet]
-    public async Task<IActionResult> Detail(GetProductByIdDto getProductByIdDto)
+    public async Task<IActionResult> GetProductDetails([FromQuery] GetProductByIdDto getProductByIdDto)
     {
         var result = await _productApplicationService.GetProductDetail(getProductByIdDto);
-
         if (result == null)
         {
-            return BadRequest(new{message = "The information could not be processed."});
+            return BadRequest(new { message = "The submitted information could not be processed." });
         }
-
-        return Json(result);
+        else
+        {
+            return Json(result);
+        }
     }
     #endregion
 
@@ -63,14 +66,8 @@ public class ProductController : Controller
 
         if (ModelState.IsValid)
         {
-            var product = await _productApplicationService.GetProductDelete(
-                new GetProductByIdDto { Id = deleteProductDto.Id });
-            if (product == null)
-            {
-                return NotFound(new { success = false, message = "Product was not found" });
-            }
 
-            await _productApplicationService.Delete(product);
+            await _productApplicationService.Delete(deleteProductDto);
 
             return Json(new { success = true, message = "Product deleted successfully" });
         }

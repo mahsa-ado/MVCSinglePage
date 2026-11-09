@@ -8,10 +8,6 @@ namespace MVCSinglePage.ApplicationServices.Services.Contracts
         Task Put(PutProductDto putProductDto);
         #endregion
 
-        #region [- GetProductForDelete() -]
-        Task<DeleteProductDto?> GetProductDelete(GetProductByIdDto getProductByIdDto);
-        #endregion
-
         #region [- Delete() -]
         Task Delete(DeleteProductDto deleteProductDto);
         #endregion
@@ -21,7 +17,7 @@ namespace MVCSinglePage.ApplicationServices.Services.Contracts
 
         #endregion
 
-        #region [- GetProductDetail() -]
+        #region [- GetProductDetail -]
         Task<DetailProductDto?> GetProductDetail(GetProductByIdDto getProductByIdDto);
 
         #endregion

@@ -1,11 +1,8 @@
 ﻿
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MVCSinglePage.ApplicationServices.Dtos.ProductDtos;
 using MVCSinglePage.ApplicationServices.Services.Contracts;
 using MVCSinglePage.Models.DomainModels.ProductAggregates;
 using MVCSinglePage.Models.Services.Contracts;
-using System.Net.WebSockets;
 
 namespace MVCSinglePage.ApplicationServices.Services
 {
@@ -38,43 +35,19 @@ namespace MVCSinglePage.ApplicationServices.Services
         }
         #endregion
 
-        #region [- GetProductForDelete() -]
-        public async Task<DeleteProductDto?> GetProductDelete(GetProductByIdDto getProductByIdDto)
-        {
-            var product = await _productRepository.SelectProductById(getProductByIdDto);
-
-            if (product == null)
-            {
-                return null;
-            }
-
-            var deleteProductDto = new DeleteProductDto
-            {
-                Id = product.Id,
-                Title = product.Title,
-                DescriptionRecord = product.DescriptionRecord,
-                UnitPrice = product.UnitPrice,
-            };
-
-            return deleteProductDto;
-        }
-        #endregion
-
         #region [- Delete() -]
         public async Task Delete(DeleteProductDto deleteProductDto)
         {
-            if (deleteProductDto == null)
+            if (deleteProductDto == null || deleteProductDto.Id == Guid.Empty)
             {
                 return;
             }
-            var deleteProducts = await _productRepository.SelectProductById(
-                new GetProductByIdDto { Id = deleteProductDto.Id });
-            if (deleteProducts == null)
+            var productDto = new Product()
             {
-                return;
-            }
+                Id = deleteProductDto.Id,
+            };
 
-            await _productRepository.Delete(deleteProducts);
+            await _productRepository.Delete(productDto);
         }
         #endregion
 
@@ -98,25 +71,24 @@ namespace MVCSinglePage.ApplicationServices.Services
         #endregion
 
         #region [- GetProductDetail() -]
-
         public async Task<DetailProductDto?> GetProductDetail(GetProductByIdDto getProductByIdDto)
         {
             var product = await _productRepository.SelectProductById(getProductByIdDto);
-
             if (product == null)
             {
                 return null;
             }
-            var detailProductDto = new DetailProductDto
+
+            var productDto= new DetailProductDto()
             {
                 Id = product.Id,
                 Title = product.Title,
+                UnitPrice = product.UnitPrice,
                 DescriptionRecord = product.DescriptionRecord,
-                UnitPrice = product.UnitPrice
             };
-            return detailProductDto;
+            return productDto;
         }
-        #endregion 
+        #endregion
 
         #region [- GetAllProducts() -]
         public async Task<List<GetProductDto>> GetAllProducts()

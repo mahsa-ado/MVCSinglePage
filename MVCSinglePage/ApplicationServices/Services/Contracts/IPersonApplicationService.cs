@@ -8,11 +8,6 @@ namespace MVCSinglePage.ApplicationServices.Services.Contracts
         Task Put(PutPersonDto putPersonDto);
         #endregion
 
-        #region [- GetPersonForDelete() -]
-        Task<DeletePersonDto?> GetPersonDelete(GetPersonByIdDto getPersonByIdDto);
-
-        #endregion        
-
         #region [- Delete() -]
         Task Delete(DeletePersonDto deletePersonDto);
         #endregion
