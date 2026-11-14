@@ -226,3 +226,6 @@ body {
         margin: 0 20px 24px;
     }
 }
+[hidden] {
+    display: none !important;
+}

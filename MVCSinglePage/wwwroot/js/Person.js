@@ -43,7 +43,7 @@ loadPeople();
 // گرفتن فهرست افراد از سرور
 async function loadPeople() {
     try {
-        const response = await fetch('/Person/GetAll');
+        const response = await fetch('/Person/Index');
         if (!response.ok) throw new Error('Could not load people');
         people = await response.json();
         showPeople();
@@ -70,18 +70,18 @@ function showPeople() {
 
     people.forEach(person => {
         const row = document.createElement('tr');
-
-        // if (person.id === selectedPersonId) {
-        //     row.classList.add('selected-row');
-        // }
-
         const checkboxCell = document.createElement('td');
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.className = 'person-select';
-        checkbox.checked = person.id === selectedPersonId;
-        checkboxCell.appendChild(checkbox);
         row.appendChild(checkboxCell);
+        checkboxCell.appendChild(checkbox);
+        if (person.id === selectedPersonId) {
+            checkbox.checked = true;
+        } else {
+            checkbox.checked = false;
+        }       
+
 
         [person.firstName, person.lastName, person.age].forEach(value => {
             const cell = document.createElement('td');
@@ -252,7 +252,7 @@ async function showDetails() {
 // حذف
 async function deletePerson() {
     if (!selectedPersonId || !confirm("Are you sure you want to delete this person?")) return;
-
+    
     try {
         const response = await fetch('/Person/Delete', {
             method: 'POST',
@@ -260,12 +260,13 @@ async function deletePerson() {
             body: JSON.stringify({ id: selectedPersonId })
         });
 
-        const responseBody = await response.text();
-        const result = responseBody ? JSON.parse(responseBody) : {};
+        const result = await response.json();
+
         if (!response.ok || !result.success) {
             showMessage(result.message || 'Operation failed');
             return;
         }
+
 
         resetForm();
         selectedPersonId = null;

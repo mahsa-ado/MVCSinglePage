@@ -103,17 +103,17 @@ public class ProductController : Controller
     public async Task<IActionResult> Index()
     {
         var result = await _productApplicationService.GetAllProducts();
-        return View();
+        return Json(result);
             
     }
     #endregion
 
-    #region [- GetAll() -]
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var result = await _productApplicationService.GetAllProducts();
-        return Json(result);
-    } 
-    #endregion
+    //#region [- GetAll() -]
+    //[HttpGet]
+    //public async Task<IActionResult> GetAll()
+    //{
+    //    var result = await _productApplicationService.GetAllProducts();
+    //    return Json(result);
+    //} 
+    //#endregion
 }

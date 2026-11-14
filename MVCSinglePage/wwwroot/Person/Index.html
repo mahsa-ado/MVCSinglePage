@@ -1,0 +1,104 @@
+<link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/site.css">
+
+
+<div class="person-page">
+    <main class="person-card">
+        <header class="person-header">
+            <div>
+                <span class="eyebrow">PEOPLE DIRECTORY</span>
+                <h1>Person Management</h1>
+            </div>
+            <div class="people-count">
+                <span id="totalCount">0</span>
+                <small>People</small>
+            </div>
+        </header>
+
+        <section class="person-section">
+            <div class="section-heading">
+                <div>
+                    <h2>Person Details</h2>
+                    <p id="formModeText">Add a new person or select a row to edit.</p>
+                </div>
+            </div>
+            <!-- Data Entry Form -->
+            <form id="personForm">
+                <input type="hidden" id="personId" />
+
+                <div class="form-grid">
+                    <div>
+                        <label for="firstName" class="form-label">First name</label>
+                        <input id="firstName" name="firstName" class="form-control"
+                               type="text" placeholder="Enter first name" autocomplete="off" required />
+                    </div>
+
+                    <div>
+                        <label for="lastName" class="form-label">Last name</label>
+                        <input id="lastName" name="lastName" class="form-control"
+                               type="text" placeholder="Enter last name" autocomplete="off" required />
+                    </div>
+
+                    <div>
+                        <label for="age" class="form-label">Age</label>
+                        <input id="age" name="age" class="form-control"
+                               type="number" min="1" placeholder="Enter age" required />
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button id="btnAdd" type="button" class="btn btn-primary">Add new</button>
+                    <button id="btnSave" type="submit" class="btn btn-success">Save person</button>
+                    <button id="btnCancelEdit" type="button" class="btn btn-light" hidden>Cancel</button>
+                    <span id="resultMessage" role="status"></span>
+                </div>
+            </form>
+        </section>
+        <!--detail-->
+        <section id="detailPanel" class="detail-panel" hidden>
+            <div>
+                <span class="eyebrow">SELECTED PERSON</span>
+                <h2 id="detailName"></h2>
+            </div>
+            <div class="detail-values">
+                <span>Age: <strong id="detailAge"></strong></span>
+                <span>ID: <strong id="detailId"></strong></span>
+            </div>
+        </section>
+        <!--Show List-->
+        <section class="person-section list-section">
+            <div class="section-heading list-heading">
+                <div>
+                    <h2>People List</h2>
+                    <p>Select one person using the checkbox to edit, view, or delete.</p>
+                </div>
+                <!--buttons-->
+                <div class="list-actions">
+                    <button id="btnEdit" type="button" class="btn btn-outline-primary" disabled>Edit</button>
+                    <button id="btnDetail" type="button" class="btn btn-outline-secondary" disabled>Detail</button>
+                    <button id="btnDelete" type="button" class="btn btn-outline-danger" disabled>Delete</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table people-table">
+                    <thead>
+                        <tr>
+                            <th scope="col" aria-label="Select person"></th>
+                            <th>First name</th>
+                            <th>Last name</th>
+                            <th>Age</th>
+                        </tr>
+                    </thead>
+                    <tbody id="peopleTableBody">
+                        <tr>
+                            <td colspan="4" class="empty-state">Loading people…</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="/js/Person.js"></script>

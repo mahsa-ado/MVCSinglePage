@@ -41,7 +41,7 @@ loadProducts();
 
 async function loadProducts() {
     try {
-        const response = await fetch('/Product/GetAll');
+        const response = await fetch('/Product/Index');
         if (!response.ok) throw new Error('Could not load products');
         products = await response.json();
         showProducts();

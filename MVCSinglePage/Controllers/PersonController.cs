@@ -83,7 +83,7 @@ public class PersonController : Controller
     public async Task<IActionResult> Index()
     {
         var result = await _personApplicationService.GetAllPerson();
-        return View(result);
+        return Json(result);
     }
     #endregion
 
@@ -111,13 +111,13 @@ public class PersonController : Controller
 
     #endregion
 
-    #region [- GetAll() -]
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var result = await _personApplicationService.GetAllPerson();
-        return Json(result);
-    }
+    //#region [- GetAll() -]
+    //[HttpGet]
+    //public async Task<IActionResult> GetAll()
+    //{
+    //    var result = await _personApplicationService.GetAllPerson();
+    //    return Json(result);
+    //}
 
-    #endregion
+    //#endregion
 }
