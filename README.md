@@ -4,11 +4,12 @@ A sample ASP.NET Core MVC application for managing people and products. It combi
 
 ## Features
 
-- Browse and manage people and products
+- Browse and manage people and products from the browser
 - Create, edit, view details, and delete records through controller endpoints
+- Validate first and last names in the browser, accepting Unicode letters and spaces
 - Separate controllers, application services, DTOs, repositories, and domain models
 - Asynchronous database operations with Entity Framework Core
-- Razor views with Bootstrap and client-side JavaScript
+- Static HTML pages with Bootstrap and client-side JavaScript
 
 ## Technology Stack
 
@@ -30,8 +31,12 @@ MVCSinglePage/
 │   ├── DomainModels/         # Person and Product entities
 │   ├── Services/             # Repository contracts and implementations
 │   └── ProjectDbContext.cs   # EF Core database context
-├── Views/                    # Razor pages
-└── wwwroot/                  # CSS, JavaScript, and static libraries
+├── Views/                    # MVC Razor views
+└── wwwroot/
+    ├── Person/               # People management page
+    ├── Product/              # Product management page
+    ├── css/                  # Stylesheets
+    └── js/                   # Browser-side application logic
 ```
 
 ## Prerequisites
@@ -59,20 +64,20 @@ MVCSinglePage/
    dotnet run --project MVCSinglePage/MVCSinglePage.csproj
    ```
 
-5. Open the local URL printed in the terminal. The default route opens the home page. The people and products pages are available at `/Person` and `/Product`.
+5. Open the local URL printed in the terminal. The management pages are available at `/Person/Index.html` and `/Product/Index.html`.
 
 ## Main Routes
 
 | Route | Purpose |
 | --- | --- |
-| `/Person` | People management page |
-| `/Person/GetAll` | Returns the people list as JSON |
+| `/Person/Index.html` | People management page |
+| `/Person/Index` | Returns the people list as JSON (`GET`) |
 | `/Person/GetPersonDetails?id=...` | Returns a person's details |
-| `/Person/create` | Creates a person (JSON `POST`) |
+| `/Person/Create` | Creates a person (JSON `POST`) |
 | `/Person/Edit` | Updates a person (JSON `POST`) |
 | `/Person/Delete` | Deletes a person (JSON `POST`) |
-| `/Product` | Products page |
-| `/Product/GetAll` | Returns the products list as JSON |
+| `/Product/Index.html` | Products page |
+| `/Product/Index` | Returns the products list as JSON (`GET`) |
 | `/Product/GetProductDetails?id=...` | Returns a product's details |
 | `/Product/Create` | Creates a product (JSON `POST`) |
 | `/Product/Edit` | Updates a product (JSON `POST`) |
