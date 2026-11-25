@@ -36,7 +36,14 @@ btnCancelEdit.addEventListener('click', resetForm);
 btnEdit.addEventListener('click', editPerson);
 btnDetail.addEventListener('click', showDetails);
 btnDelete.addEventListener('click', deletePerson);
+//بررسی ورودی ها
+firstNameInput.addEventListener('input', () => {
+    firstNameInput.setCustomValidity('');
+});     //درصورتی شروع  کردن به تایپ ، پیغام ارور را پاک میکند
 
+lastNameInput.addEventListener('input', () => {
+    lastNameInput.setCustomValidity('');
+});
 // بارگذاری فهرست افراد هنگام باز شدن صفحه
 loadPeople();
 
@@ -150,7 +157,7 @@ function enableButtons() {
 
 }
 
-// پر کردن فرم با اطلاعات فرد انتخاب‌شده
+// ویرایش
 function editPerson() {
 
     // پیدا کردن شخص انتخاب شده
@@ -184,12 +191,27 @@ function editPerson() {
 
 
 // افزودن فرد جدید یا ویرایش فرد انتخاب‌شده
+const namePattern = /^[\p{L}\s]+$/u;
 
 async function savePerson(event) {
     event.preventDefault();
+    const firstName = firstNameInput.value.trim();//حذف فاصله های اول و اخر
+    const lastName = lastNameInput.value.trim();
 
-    if (!personForm.reportValidity()) return;
+    if (!namePattern.test(firstName)) {
+        firstNameInput.setCustomValidity('نام باید فقط شامل حروف باشد.');//تنظیم پیغام خطا
+        firstNameInput.reportValidity();   // پیام خطا را نشان می‌دهد
+        return;                            // سیو نمی‌شود
+    }
 
+    if (!namePattern.test(lastName)) {
+        lastNameInput.setCustomValidity('نام خانوادگی باید فقط شامل حروف باشد.');
+        lastNameInput.reportValidity();
+        return;
+    }
+    if (!personForm.reportValidity()) return;// سیو نشدن در صورت خالی بودن یا مشکل دیگر
+
+    
     let url = '';
 
     if (isEditing) {
